@@ -3,7 +3,6 @@ pipeline {
 
     tools {
         maven 'maven'
-        jdk 'jdk17'
     }
 
     environment {
@@ -15,6 +14,7 @@ pipeline {
         stage('Build JAR') {
             steps {
                 sh '''
+                java -version
                 mvn -version
                 mvn clean package -DskipTests
                 '''
@@ -23,18 +23,14 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh '''
-                docker build -t $DOCKER_IMAGE:latest .
-                '''
+                sh 'docker build -t $DOCKER_IMAGE:latest .'
             }
         }
 
         stage('Push Docker Image') {
             steps {
                 withDockerRegistry(credentialsId: 'dockerhub-creds') {
-                    sh '''
-                    docker push $DOCKER_IMAGE:latest
-                    '''
+                    sh 'docker push $DOCKER_IMAGE:latest'
                 }
             }
         }

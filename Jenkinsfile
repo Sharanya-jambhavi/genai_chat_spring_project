@@ -3,6 +3,7 @@ pipeline {
 
     tools {
         maven 'maven'
+        jdk 'jdk17'
     }
 
     environment {
@@ -11,31 +12,29 @@ pipeline {
 
     stages {
 
-        stage('Pull Source Code') {
-            steps {
-                git 'https://github.com/Sharanya-jambhavi/genai_chat_spring_project.git'
-            }
-        }
-
         stage('Build JAR') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh '''
+                mvn -version
+                mvn clean package -DskipTests
+                '''
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE:latest .'
+                sh '''
+                docker build -t $DOCKER_IMAGE:latest .
+                '''
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                withDockerRegistry(
-                    credentialsId: 'dockerhub-creds',
-                    url: ''
-                ) {
-                    sh 'docker push $DOCKER_IMAGE:latest'
+                withDockerRegistry(credentialsId: 'dockerhub-creds') {
+                    sh '''
+                    docker push $DOCKER_IMAGE:latest
+                    '''
                 }
             }
         }
@@ -50,6 +49,15 @@ pipeline {
                 kubectl apply -f k8s/app-service.yaml
                 '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ CI/CD Pipeline executed successfully'
+        }
+        failure {
+            echo '❌ Pipeline failed – check logs'
         }
     }
 }

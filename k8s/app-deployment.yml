@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genai-app
+  namespace: genai-project
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: genai
+  template:
+    metadata:
+      labels:
+        app: genai
+    spec:
+
+      # 1️⃣ INIT CONTAINER (WAIT FOR DB)
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z mysql 3306;
+              do echo "Waiting for MySQL...";
+              sleep 5;
+              done;
+
+      # 2️⃣ MAIN APPLICATION CONTAINER
+      containers:
+        - name: springboot-app
+          image: sky1912/genai-chat-app:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql:3306/genaidb
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: root123

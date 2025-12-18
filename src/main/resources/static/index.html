@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GenAI Chat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>GenAI Chat</h1>
+    <p class="subtitle">AI-powered conversations</p>
+  </header>
+
+  <div id="chat"></div>
+
+  <footer>
+    <textarea id="prompt" placeholder="Type your message..."></textarea>
+    <button id="send">➤</button>
+  </footer>
+
+  <div class="credit">Developed by <strong>sak_shetty</strong> • Software Engineer</div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const promptEl = document.getElementById('prompt');
+    const sendBtn = document.getElementById('send');
+
+    sendBtn.onclick = send;
+    promptEl.addEventListener("keypress", function(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        send();
+      }
+    });
+
+    async function send() {
+      const text = promptEl.value.trim();
+      if (!text) return;
+      append('You', text, 'you');
+      promptEl.value = '';
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        const reply = await res.text();
+        append('AI', reply, 'ai');
+      } catch (err) {
+        append('Error', err.message, 'ai');
+      }
+    }
+
+    function append(who, text, cls) {
+      const d = document.createElement('div');
+      d.className = 'msg ' + cls;
+      const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      d.innerHTML = `
+        <div class="bubble">
+          <div class="meta"><strong>${who}</strong> • ${time}</div>
+          <div class="text">${text}</div>
+        </div>`;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>

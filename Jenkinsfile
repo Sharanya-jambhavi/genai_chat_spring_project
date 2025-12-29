@@ -57,11 +57,11 @@ pipeline {
                 sh '''
                 echo "🔹 Deploying to Kubernetes"
 
-                kubectl apply -f k8s/namespace.yaml
-                kubectl apply -f k8s/mysql-svc.yaml
-                kubectl apply -f k8s/mysql-statefulset.yaml
-                kubectl apply -f k8s/app-deployment.yaml
-                kubectl apply -f k8s/app-service.yaml
+                kubectl apply -f k8s/namespace.yml
+                kubectl apply -f k8s/mysql-svc.yml
+                kubectl apply -f k8s/mysql-statefulset.yml
+                kubectl apply -f k8s/app-deployment.yml
+                kubectl apply -f k8s/app-service.yml
                 '''
             }
         }

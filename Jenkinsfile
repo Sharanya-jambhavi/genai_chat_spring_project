@@ -55,8 +55,16 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                echo "🔹 Deploying all Kubernetes manifests"
-                kubectl apply -f k8s/
+                echo "🔹 Creating namespace"
+                kubectl apply -f k8s/namespace.yml
+       
+                echo "🔹 Deploying MySQL"
+                kubectl apply -f k8s/mysql-service.yml
+                kubectl apply -f k8s/mysql-statefulset.yml
+
+                echo "🔹 Deploying Application"
+                kubectl apply -f k8s/app-deployment.yml
+                kubectl apply -f k8s/app-service.yml
                 '''
             }
         }

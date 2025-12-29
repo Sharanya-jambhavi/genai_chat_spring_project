@@ -32,7 +32,7 @@ spec:
         - name: springboot-app
           image: sky1912/genai-chat-app:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 8085 
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://mysql:3306/genaidb

@@ -9,6 +9,6 @@ spec:
     app: genai
   ports:
     - port: 8080
-      targetPort: 8080
+      targetPort: 8085
       nodePort: 30088
       

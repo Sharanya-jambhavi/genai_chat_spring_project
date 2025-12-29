@@ -56,7 +56,7 @@ pipeline {
             steps {
                 sh '''
                 echo "🔹 Creating namespace"
-                kubectl apply -f k8s/namespace.yml
+                kubectl apply -f k8s/namespace.yaml
        
                 echo "🔹 Deploying MySQL"
                 kubectl apply -f k8s/mysql-service.yml

@@ -7,14 +7,14 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      app: genai
+      app: genai-app
   template:
     metadata:
       labels:
-        app: genai
+        app: genai-app
     spec:
 
-      # 1️⃣ INIT CONTAINER (WAIT FOR DB)
+      # ---------- INIT CONTAINER (wait for MySQL) ----------
       initContainers:
         - name: wait-for-mysql
           image: busybox
@@ -22,21 +22,49 @@ spec:
             - sh
             - -c
             - |
-              until nc -z mysql 3306;
-              do echo "Waiting for MySQL...";
-              sleep 5;
-              done;
+              until nc -z mysql 3306; do
+                echo "Waiting for MySQL...";
+                sleep 5;
+              done
 
-      # 2️⃣ MAIN APPLICATION CONTAINER
+      # ---------- MAIN APPLICATION CONTAINER ----------
       containers:
         - name: springboot-app
           image: sky1912/genai-chat-app:latest
+          imagePullPolicy: Always
+
           ports:
-            - containerPort: 8085 
+            - containerPort: 8085
+
+          # ---------- ENVIRONMENT VARIABLES ----------
           env:
+            # 🔑 OpenAI API Key from Kubernetes Secret
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-secret
+                  key: OPENAI_API_KEY
+
+            # 🛢️ MySQL Connection Details
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysql:3306/genaidb
+              value: jdbc:mysql://mysql:3306/genai_db?useSSL=false&allowPublicKeyRetrieval=true
             - name: SPRING_DATASOURCE_USERNAME
               value: root
             - name: SPRING_DATASOURCE_PASSWORD
-              value: root123
+              value: root
+
+          # ---------- READINESS PROBE ----------
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8085
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+          # ---------- LIVENESS PROBE ----------
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8085
+            initialDelaySeconds: 40
+            periodSeconds: 20

@@ -15,7 +15,6 @@ pipeline {
             steps {
                 sh '''
                 java -version
-                mvn -version
                 mvn clean package -DskipTests
                 '''
             }
@@ -29,8 +28,16 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withDockerRegistry(credentialsId: 'dockerhub-creds') {
-                    sh 'docker push $DOCKER_IMAGE:latest'
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push $DOCKER_IMAGE:latest
+                    docker logout
+                    '''
                 }
             }
         }
@@ -50,10 +57,11 @@ pipeline {
 
     post {
         success {
-            echo '✅ CI/CD Pipeline executed successfully'
+            echo '🎉 FULL CI/CD PIPELINE COMPLETED SUCCESSFULLY'
         }
         failure {
             echo '❌ Pipeline failed – check logs'
         }
     }
 }
+

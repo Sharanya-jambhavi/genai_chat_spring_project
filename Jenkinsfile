@@ -55,13 +55,8 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                echo "🔹 Deploying to Kubernetes"
-
-                kubectl apply -f k8s/namespace.yml
-                kubectl apply -f k8s/mysql-svc.yml
-                kubectl apply -f k8s/mysql-statefulset.yml
-                kubectl apply -f k8s/app-deployment.yml
-                kubectl apply -f k8s/app-service.yml
+                echo "🔹 Deploying all Kubernetes manifests"
+                kubectl apply -f k8s/
                 '''
             }
         }
@@ -69,7 +64,7 @@ pipeline {
 
     post {
         success {
-            echo '🎉 CI/CD PIPELINE COMPLETED SUCCESSFULLY'
+            echo '🎉 FULL CI/CD PIPELINE COMPLETED SUCCESSFULLY'
         }
         failure {
             echo '❌ PIPELINE FAILED — CHECK LOGS'
